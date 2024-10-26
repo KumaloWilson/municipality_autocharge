@@ -1,0 +1,16 @@
+{
+  "name": "express_firebase_auto_charge_backend",
+  "version": "1.0.0",
+  "description": "An Express backend for monthly auto-charges with Firebase Firestore.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.17.1",
+    "firebase-admin": "^9.11.0",
+    "node-cron": "^2.0.3"
+  }
+}
