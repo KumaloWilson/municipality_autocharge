@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const cron = require('node-cron');
+const moment = require('moment-timezone');
 require('dotenv').config();
 
 const routes = require('./routes');
@@ -17,10 +18,12 @@ app.use('/api', routes);
 const PORT = 3300;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 
-// Scheduled Cron Job (First day of every month at midnight)
+
+// Scheduled Cron Job (First day of every month at midnight GMT)
 cron.schedule('0 0 1 * *', async () => {
     try {
-        console.log("Running scheduled auto charge...");
+        const currentTime = moment().tz('GMT').format(); // Log the current GMT time
+        console.log(`Running scheduled auto charge at ${currentTime} (GMT)...`);
 
         // Call the autoCharge API
         const response = await axios.post(`${BASE_URL}/api/autoCharge`);
@@ -28,10 +31,8 @@ cron.schedule('0 0 1 * *', async () => {
     } catch (error) {
         console.error("Error during scheduled auto charge:", error.message);
     }
-}, {
-    scheduled: true,
-    timezone: "UTC" // Set desired timezone
 });
+
 
 // Start Server
 app.listen(PORT, () => {
