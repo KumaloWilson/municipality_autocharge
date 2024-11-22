@@ -1,16 +1,17 @@
 
 const FirestoreService = require('../services/firestoreService');
 
-// Automatic monthly charge function
-exports.autoChargeMonthlyBalances = async () => {
+exports.autoChargeMonthlyBalances = async (req, res) => {
     try {
-        const residents = await FirestoreService.getResidents();
-        for (const resident of residents) {
-            const newBalance = calculateMonthlyBalance(resident.balances);
-            await FirestoreService.updateResidentBalance(resident.id, newBalance);
-        }
+        // Call the function to update all residents' balances
+        await FirestoreService.updateAllResidentsBalances();
+        res.status(200).json({ message: "Balances updated successfully." });
+        console.log("Monthly balances charged successfully.");
+
     } catch (error) {
         console.error("Error processing monthly charges:", error);
+
+        res.status(500).json({ error: "Failed to update balance.", body: error.message });
     }
 };
 

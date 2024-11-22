@@ -1,4 +1,5 @@
 const { db, admin } = require('../utils/firebase');
+const moment = require('moment'); // For handling dates
 // Get all residents
 exports.getResidents = async () => {
     const snapshot = await db.collection('residents').get();
@@ -26,3 +27,43 @@ exports.updateResidentBalanceByEmail = async (email, newBalance) => {
     });
 };
 
+
+exports.updateAllResidentsBalances = async () => {
+    const currentMonth = moment().format('MMMM'); // e.g., "November"
+    const currentYear = moment().format('YYYY');  // e.g., "2024"
+    const bins = 5.00; // Fixed value
+    const rates = 25.00; // Fixed value
+    const sewerage = 8.00; // Fixed value
+
+    // Fetch all residents
+    const snapshot = await db.collection('residents').get();
+    const residents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    const updates = residents.map(async resident => {
+        // Determine balance carried forward from the latest month
+        const balances = resident.balances || [];
+        const lastBalance = balances.length > 0 ? balances[balances.length - 1] : null;
+
+        const balanceCarriedForward = lastBalance?.currentBalance || 0;
+        const monthTotal = balanceCarriedForward + bins + rates + sewerage;
+
+        const newBalance = {
+            month: currentMonth,
+            year: currentYear,
+            balanceCarriedForward,
+            bins,
+            rates,
+            sewerage,
+            currentBalance: monthTotal,
+            monthlyPayments: [],
+        };
+
+        // Update the resident's document
+        await db.collection('residents').doc(resident.id).update({
+            balances: admin.firestore.FieldValue.arrayUnion(newBalance),
+        });
+    });
+
+    // Wait for all updates to complete
+    await Promise.all(updates);
+};
