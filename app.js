@@ -14,7 +14,7 @@ app.use(express.json());
 app.use('/api', routes);
 
 // Environment Variables
-const PORT = process.env.PORT || 3000;
+const PORT = 3300;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 
 // Scheduled Cron Job (First day of every month at midnight)
